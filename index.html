@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>I wanna follow... at Mastodon</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/semantic-ui/2.3.3/semantic.min.css">
+  <style>
+    body {
+      background: rgb(182, 136, 224);
+      height: 100%;
+    }
+    h1 {
+      display: inline;
+    }
+    #middleArea {
+      margin-left: 10vw;
+      margin-right: 10vw;
+    }
+    #btns {
+      margin-top: 2vh;
+    }
+    input.ui.massive {
+      width: 140%;
+    }
+    i.check.icon {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="fullPageContainer">
+    <div id="middleArea">
+      <div id="inps">
+        <div class="ui labeled icon input">
+          <div class="ui label">
+            My instance is
+          </div>
+          <input id="txtInstance" type="text" placeholder="mastodon.social">
+          <i class="check icon"></i>
+        </div>
+        <div class="ui divider"></div>
+        <div class="ui labeled massive input">
+          <div class="ui massive label">
+            I wanna follow
+          </div>
+          <input id="txtFollow" class="ui massive" type="text" placeholder="@Gargron@mastodon.social">
+        </div>
+      </div>
+      <br />
+      <div id="btns">
+        <button id="btnFollow" class="ui big blue button">
+          Follow
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/semantic-ui/2.3.3/semantic.min.js"></script>
+<script>
+  var $instance = $('#txtInstance');
+  var $theid = $('#txtFollow');
+  var innerH = window.innerHeight;
+  var $btnFo = $('#btnFollow');
+  var theInstanceName = "mastodon.social";
+  var jumpTo = (instName, userID) => {
+    window.location = `https://${instName}/authorize_interaction?uri=${userID}`;
+  }
+
+  $('#fullPageContainer').height(innerH);
+  marginHeight = innerH * 0.6 / 2;
+  $('#middleArea').css('padding-top', marginHeight);
+  if (localStorage) {
+    if (localStorage.getItem("myInstance")) {
+      theInstanceName = localStorage.getItem("myInstance");
+      $instance.val(theInstanceName);
+    }
+  }
+
+  $instance.blur(() => {
+    let instanceName = $instance.val();
+    let realInstanceName = instanceName.replace(/http(s):\/\//, '')
+      .replace(/\/.*$/, '');
+    if (realInstanceName.match(/^\w*(\.\w*)+$/)) {
+      theInstanceName = realInstanceName;
+      $('.check.icon').show();
+      $instance.val(theInstanceName);
+      if (localStorage) {
+        localStorage.setItem("myInstance", theInstanceName);
+      }
+    } else {
+      $('.check.icon').hide();
+    }
+  });
+
+  $btnFo.click(() => {
+    let foID = $theid.val() || '@Gargron@mastodon.social';
+    if (foID.match(/^\w*@\w*(\.\w*)+$/)) jumpTo(theInstanceName, foID);
+    if (foID.match(/^@\w*@\w*(\.\w*)+$/)) jumpTo(theInstanceName, foID.replace(/^@/, ''));
+  })
+</script>
+
+</html>
