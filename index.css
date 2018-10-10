@@ -1,0 +1,25 @@
+body {
+  background: rgb(182, 136, 224);
+  height: 100%;
+}
+
+h1 {
+  display: inline;
+}
+
+#middleArea {
+  margin-left: 10vw;
+  margin-right: 10vw;
+}
+
+#btns {
+  margin-top: 2vh;
+}
+
+input.ui.massive {
+  width: 140%;
+}
+
+i.check.icon {
+  display: none;
+}

@@ -7,28 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>I wanna follow... at Mastodon</title>
   <link rel="stylesheet" href="https://cdn.staticfile.org/semantic-ui/2.3.3/semantic.min.css">
-  <style>
-    body {
-      background: rgb(182, 136, 224);
-      height: 100%;
-    }
-    h1 {
-      display: inline;
-    }
-    #middleArea {
-      margin-left: 10vw;
-      margin-right: 10vw;
-    }
-    #btns {
-      margin-top: 2vh;
-    }
-    input.ui.massive {
-      width: 140%;
-    }
-    i.check.icon {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
@@ -64,36 +43,45 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="https://cdn.staticfile.org/semantic-ui/2.3.3/semantic.min.js"></script>
 <script>
+  // Global varient
+  var instanceName = "mastodon.social";
+
+  // Varients for convenience
   var $instance = $('#txtInstance');
   var $theid = $('#txtFollow');
   var innerH = window.innerHeight;
   var $btnFo = $('#btnFollow');
-  var theInstanceName = "mastodon.social";
+
   var jumpTo = (instName, userID) => {
     window.location = `https://${instName}/authorize_interaction?uri=${userID}`;
   }
 
+  var updateInstanceName = (instName) => {
+    instanceName = instName;
+    $instance.val(instanceName);
+    if (localStorage) {
+      localStorage.setItem("myInstance", instanceName);
+    }
+  }
+
+  // Startup
   $('#fullPageContainer').height(innerH);
   marginHeight = innerH * 0.6 / 2;
   $('#middleArea').css('padding-top', marginHeight);
   if (localStorage) {
     if (localStorage.getItem("myInstance")) {
-      theInstanceName = localStorage.getItem("myInstance");
-      $instance.val(theInstanceName);
+      updateInstanceName(localStorage.getItem("myInstance"));
     }
   }
 
+  // Listeners
   $instance.blur(() => {
-    let instanceName = $instance.val();
-    let realInstanceName = instanceName.replace(/http(s):\/\//, '')
+    let iName = $instance.val();
+    let realIName = iName.replace(/http(s):\/\//, '')
       .replace(/\/.*$/, '');
-    if (realInstanceName.match(/^\w*(\.\w*)+$/)) {
-      theInstanceName = realInstanceName;
+    if (realIName.match(/^\w*(\.\w*)+$/)) {
+      updateInstanceName(realIName);
       $('.check.icon').show();
-      $instance.val(theInstanceName);
-      if (localStorage) {
-        localStorage.setItem("myInstance", theInstanceName);
-      }
     } else {
       $('.check.icon').hide();
     }
@@ -101,8 +89,27 @@
 
   $btnFo.click(() => {
     let foID = $theid.val() || '@Gargron@mastodon.social';
-    if (foID.match(/^\w*@\w*(\.\w*)+$/)) jumpTo(theInstanceName, foID);
-    if (foID.match(/^@\w*@\w*(\.\w*)+$/)) jumpTo(theInstanceName, foID.replace(/^@/, ''));
+    if (foID.match(/^\w*@\w*(\.\w*)+$/)) {
+      jumpTo(instanceName, foID);
+      return;
+    }
+    if (foID.match(/^@\w*@\w*(\.\w*)+$/)) {
+      jumpTo(instanceName, foID.replace(/^@/, ''));
+      return;
+    }
+    if (foID.match(/^https?:\/\/([\w\.]*?)\/@?([\w]*)$/)) {
+      let aList = foID.match(/^https?:\/\/([\w\.]*?)\/@?([\w]*)$/);
+      if (aList.length === 3) {
+        jumpTo(instanceName, aList[2] + "@" + aList[1]);
+        return;
+      }
+    }
+
+    // Fail to match
+    $btnFo.removeClass('blue').addClass('red').text("Fail to match the account, please check and retry.");
+    setTimeout(() => {
+      $btnFo.removeClass('red').addClass('blue').text("Follow");
+    }, 1000);
   })
 </script>
 
